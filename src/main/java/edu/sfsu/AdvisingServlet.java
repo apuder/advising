@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
@@ -71,16 +72,27 @@ public class AdvisingServlet extends HttpServlet {
             return;
         }
 
+        if (path.equals("/lookup-student")) {
+            String id = request.getParameter("id");
+            String token = request.getParameter("token");
+            String readonly = request.getParameter("readonly");
+            if (token == null || !token.equals(this.token)) {
+                readonly = "true";
+            }
+            processLookupStudent(out, id, readonly);
+        }
+
         String token = request.getParameter("token");
         if (token == null || !token.equals(this.token)) {
             out.close();
             return;
         }
 
-        if (path.equals("/lookup-student")) {
+        /*if (path.equals("/lookup-student")) {
             String id = request.getParameter("id");
-            processLookupStudent(out, id);
-        }
+            String readonly = request.getParameter("readonly");
+            processLookupStudent(out, id, readonly);
+        }*/
 
         if (path.equals("/update-comment")) {
             String id = request.getParameter("id");
@@ -134,16 +146,29 @@ public class AdvisingServlet extends HttpServlet {
         out.println(html);
     }
 
-    private void processLookupStudent(PrintWriter out, String id, boolean readonly) throws IOException {
+    private void processLookupStudent(PrintWriter out, String id, String readonly) throws IOException {
         Student student = campusDB.getStudent(id);
-        String html;
-        if (student != null) {
-            commentDB.getComments(student);
-            checkpointDB.getCheckpoints(student);
-            html = HtmlFormatter.generateHtml(student, readonly);
-        } else {
-            html = "<b>Student not found</b>";
+        String html = null;
+        //System.out.println("data");
+        //System.out.println(readonly);
+        boolean ro = false;
+        if (readonly.equals("true"))
+            ro = true;
+        try{
+            if (student != null) {
+                commentDB.getComments(student);
+                checkpointDB.getCheckpoints(student);
+                html = HtmlFormatter.generateHtml(student, ro);
+                //System.out.println(html);
+
+            } else {
+                html = "<b>Student not found</b>";
+            }
         }
+        catch (Exception e) {
+            System.out.println(e);
+        }
+
         out.println(html);
     }
 
@@ -160,6 +185,31 @@ public class AdvisingServlet extends HttpServlet {
 
     private void processGenerateList(PrintWriter out, String type) {
         List<Student> students = checkpointDB.generateList(type);
+        System.out.println(type);
+        if (type.equals("413_current")){
+            students = generate413Student(students); //TODO create method matching this in each campusTestDB and oracle DB.
+        }
         CSVFormatter.generateList(out, students, type);
+    }
+
+
+    private List<Student> generate413Student(List<Student> students){
+        List<Student> csc413_students = new ArrayList<Student>();
+        String current_semester = Util.getCurrentSemester();
+        System.out.println(Util.formatSemester(current_semester));
+
+        for (Student student : students ){
+            System.out.println(student.id);
+            List<Course> course_list = campusDB.getStudent(student.id).courses;
+            for (Course course : course_list){
+                System.out.println(course.courseName + " "+ course.semester);
+                if (course.courseName.equals("CSC 413") && course.semester.equals(Util.formatSemester(current_semester))) {
+                    csc413_students.add(student);
+                    break;
+                }
+            }
+        }
+        return csc413_students;
+
     }
 }
