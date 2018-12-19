@@ -198,22 +198,18 @@ public class AdvisingServlet extends HttpServlet {
         String current_semester = Util.getCurrentSemester();
         //System.out.println(Util.formatSemester(current_semester));
 
-        int i = 0;
-        while( i < 500) {
-            csc413_students.clear();
-            for (Student student : students) {
-                //System.out.println(student.id);
-                List<Course> course_list = campusDB.getStudent(student.id).courses;
-                for (Course course : course_list) {
-                    //System.out.println(course.courseName + " " + course.semester);
-                    if (course.courseName.equals("CSC 413") && course.semester.equals(Util.formatSemester(current_semester))) {
-                        csc413_students.add(student);
-                        break;
-                    }
+        for (Student student : students) {
+            //System.out.println(student.id);
+            List<Course> course_list = campusDB.getStudent(student.id).courses;
+            for (Course course : course_list) {
+                //System.out.println(course.courseName + " " + course.semester);
+                if (course.courseName.equals("CSC 413") && course.semester.equals(Util.formatSemester(current_semester))) {
+                    csc413_students.add(student);
+                    break;
                 }
             }
-            i++;
         }
+
         return csc413_students;
 
     }
