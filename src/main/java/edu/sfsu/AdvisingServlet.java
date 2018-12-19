@@ -205,7 +205,7 @@ public class AdvisingServlet extends HttpServlet {
                 //System.out.println(student.id);
                 List<Course> course_list = campusDB.getStudent(student.id).courses;
                 for (Course course : course_list) {
-                    System.out.println(course.courseName + " " + course.semester);
+                    //System.out.println(course.courseName + " " + course.semester);
                     if (course.courseName.equals("CSC 413") && course.semester.equals(Util.formatSemester(current_semester))) {
                         csc413_students.add(student);
                         break;
