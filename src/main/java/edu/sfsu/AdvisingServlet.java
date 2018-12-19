@@ -185,7 +185,7 @@ public class AdvisingServlet extends HttpServlet {
 
     private void processGenerateList(PrintWriter out, String type) {
         List<Student> students = checkpointDB.generateList(type);
-        System.out.println(type);
+        //System.out.println(type);
         if (type.equals("413_current")){
             students = generate413Student(students); //TODO create method matching this in each campusTestDB and oracle DB.
         }
@@ -196,18 +196,23 @@ public class AdvisingServlet extends HttpServlet {
     private List<Student> generate413Student(List<Student> students){
         List<Student> csc413_students = new ArrayList<Student>();
         String current_semester = Util.getCurrentSemester();
-        System.out.println(Util.formatSemester(current_semester));
+        //System.out.println(Util.formatSemester(current_semester));
 
-        for (Student student : students ){
-            System.out.println(student.id);
-            List<Course> course_list = campusDB.getStudent(student.id).courses;
-            for (Course course : course_list){
-                System.out.println(course.courseName + " "+ course.semester);
-                if (course.courseName.equals("CSC 413") && course.semester.equals(Util.formatSemester(current_semester))) {
-                    csc413_students.add(student);
-                    break;
+        int i = 0;
+        while( i < 500) {
+            csc413_students.clear();
+            for (Student student : students) {
+                //System.out.println(student.id);
+                List<Course> course_list = campusDB.getStudent(student.id).courses;
+                for (Course course : course_list) {
+                    System.out.println(course.courseName + " " + course.semester);
+                    if (course.courseName.equals("CSC 413") && course.semester.equals(Util.formatSemester(current_semester))) {
+                        csc413_students.add(student);
+                        break;
+                    }
                 }
             }
+            i++;
         }
         return csc413_students;
 
