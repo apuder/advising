@@ -30,10 +30,18 @@ public class Course {
     }
 
     public boolean isPassingGrade() {
-        if (PASSING_GRADES.contains(grade)) {
+        String tester_grade = grade;
+        if (tester_grade.contains("/")){
+            String [] temp_arr = tester_grade.split("/");
+            tester_grade = temp_arr[temp_arr.length -1 ];
+
+        }
+
+        if (PASSING_GRADES.contains(tester_grade)) {
             return true;
         }
+
         // Gotta love those exceptions
-        return courseName.equals("CSC 412") && "CR".equals(grade);
+        return courseName.equals("CSC 412") && "CR".equals(tester_grade);
     }
 }

@@ -70,6 +70,8 @@ public class CampusTestDB extends DB implements CampusDB {
                     matcher.find();
                     String numerical = matcher.group();
                     String[] parts = course_name.split(numerical);
+                    if (parts.length > 1)
+                        numerical = numerical+parts[1];
                     course.courseName = parts[0] + " " + numerical;
                     course.grade = scoreToGrade(rs_g.getDouble("GRADE"));
                     course.semester = rs_g.getString("SEMESTER_TAKEN");

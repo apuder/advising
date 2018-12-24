@@ -236,3 +236,7 @@ html, body {
 .mdl-demo .mdl-menu__container {
     z-index: 99;
 }
+
+.mdl-data-table__cell--non-numeric.failed{
+    color: red;
+}

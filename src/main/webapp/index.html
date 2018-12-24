@@ -74,13 +74,6 @@
             });
             return false;
         }
-        function student_login() {
-
-            var section_main_read_only = document.getElementById("senior_advising_read_only");
-            section_main_read_only.style.display = "block";
-            section_login.style.display = "none";
-            return false;
-        }
 
         function show_print_page() {
             var printWindow = window.open("", "", "width=800, height=800");
@@ -90,27 +83,22 @@
             printWindow.document.close();
         }
 
-        function lookup_student(readonly) {
+        function lookup_student() {
             $('#student_id').blur();
             var id = document.getElementById("student_id");
             var section = document.getElementById("section_student_info");
             var info = document.getElementById("student_info");
-            if (readonly =="true"){
-                id = document.getElementById("student_id_ro");
-                section = document.getElementById("section_student_info_ro");
-                info = document.getElementById("student_info_ro");
-            }
 
             section.style.display = "none";
             show_spinner();
-            $.post("lookup-student", {token: token, id: id.value, readonly: readonly}, function(data, status) {
+            $.post("lookup-student", {token: token, id: id.value}, function(data, status) {
                 console.log(token);
                 info.innerHTML = data;
                 componentHandler.upgradeAllRegistered();
                 section.style.display = "block";
                 hide_spinner();
             });
-            console.log(id.value)
+            //console.log(id.value);
             return false;
         }
 
@@ -249,9 +237,6 @@
                             <span class="mdl-textfield__error">Wrong password!</span>
                         </div>
                     </form>
-                    <!--
-                                        <button onclick="return student_login();">Student Access</button>
-                    -->
                 </div>
             </section>
         </div>
@@ -266,7 +251,7 @@
             <section class="section--center mdl-grid mdl-grid--no-spacing">
                 <div class="mdl-card__supporting-text">
                     <h4>Senior Advising</h4>
-                    <form onsubmit="return lookup_student('false');">
+                    <form onsubmit="return lookup_student();">
                         <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
                             <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="student_id" />
                             <label class="mdl-textfield__label" for="student_id">Student ID</label>
@@ -280,7 +265,7 @@
                 </div>
             </section>
         </div>
-        \
+
         <div class="mdl-layout__tab-panel" id="advising413">
             <section class="section--center mdl-grid mdl-grid--no-spacing">
                 <div class="mdl-card__supporting-text">
@@ -306,24 +291,6 @@
             </section>
         </div>
     </main>
-    <div class="mdl-layout__tab-panel" id="senior_advising_read_only" style="display: none">
-        <section class="section--center mdl-grid mdl-grid--no-spacing">
-            <div class="mdl-card__supporting-text">
-                <h4>Senior Advising</h4>
-                <form onsubmit="return lookup_student('true');">
-                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                        <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="student_id_ro" />
-                        <label class="mdl-textfield__label" for="student_id">Student ID</label>
-                        <span class="mdl-textfield__error">Input is not a student ID!</span>
-                    </div>
-                </form>
-            </div>
-            <div id="section_student_info_ro" style="display: none">
-                <img style="float: right" onclick="show_print_page()" src="ic_print_black_24dp_1x.png"/>
-                <div id="student_info_ro"></div>
-            </div>
-        </section>
-    </div>
     <div id="toast" class="mdl-js-snackbar mdl-snackbar">
         <div class="mdl-snackbar__text"></div>
         <button class="mdl-snackbar__action" type="button"></button>
