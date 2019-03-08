@@ -12,9 +12,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.*;
-import java.util.List;
-import java.util.Properties;
-import java.util.UUID;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import javax.servlet.*;
 
 public class AdvisingServlet extends HttpServlet {
@@ -25,6 +24,15 @@ public class AdvisingServlet extends HttpServlet {
     private CommentDB    commentDB;
     private CheckpointDB checkpointDB;
     private CampusDB     campusDB;
+    private String  winter_start;
+    private String  winter_end;
+    private String  spring_start;
+    private String  spring_end;
+    private String  summer_start;
+    private String  summer_end;
+    private String  fall_start;
+    private String  fall_end;
+
 
 
     @Override
@@ -33,6 +41,8 @@ public class AdvisingServlet extends HttpServlet {
         HtmlFormatter.init(context);
 
         Properties props = new Properties();
+        Properties date_props = new Properties();
+
 
         try {
             InputStream is = context.getResourceAsStream("/WEB-INF/course_requirements.json");
@@ -45,6 +55,13 @@ public class AdvisingServlet extends HttpServlet {
             is = context.getResourceAsStream("/WEB-INF/advising.properties");
             props.load(is);
             is.close();
+
+            is = context.getResourceAsStream("/WEB-INF/semester_dates.properties");
+            date_props.load(is);
+            is.close();
+
+
+
         } catch (IOException | ParseException e) {
             throw new ServletException(e.getMessage());
         }
@@ -55,6 +72,16 @@ public class AdvisingServlet extends HttpServlet {
         commentDB = (CommentDB) DB.init("COMMENT", props);
         checkpointDB = (CheckpointDB) DB.init("CHECKPOINT", props);
         campusDB = (CampusDB) DB.init("CAMPUS", props);
+
+        fall_start = date_props.getProperty("FALL_SEMS_START").trim();
+        fall_end = date_props.getProperty("FALL_SEMS_END").trim();
+        winter_start = date_props.getProperty("WINTER_SEMS_START").trim();
+        winter_end = date_props.getProperty("WINTER_SEMS_END").trim();
+        spring_start = date_props.getProperty("SPRING_SEMS_START").trim();
+        spring_end = date_props.getProperty("SPRING_SEMS_END").trim();
+        summer_start = date_props.getProperty("SUMMER_SEMS_START").trim();
+        summer_end = date_props.getProperty("SUMMER_SEMS_END").trim();
+
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -134,6 +161,7 @@ public class AdvisingServlet extends HttpServlet {
         out.println(html);
     }
 
+
     private void processUpdateComment(String id, String course, String comment) {
         commentDB.updateComment(id, course, comment);
     }
@@ -147,6 +175,69 @@ public class AdvisingServlet extends HttpServlet {
 
     private void processGenerateList(PrintWriter out, String type) {
         List<Student> students = checkpointDB.generateList(type);
+        if (type.equals("413_current") || type.equals("grad_current")){
+            String [] compDate = getCurrentCompDates();
+            students = filterQueryByDate(students, type, compDate[0], compDate[1]);
+        }
         CSVFormatter.generateList(out, students, type);
     }
+
+    private String [] getCurrentCompDates(){
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new java.util.Date());
+        String year = String.valueOf(cal.get(Calendar.YEAR));
+        String comp_start = fall_start;//default to winter semester.
+        String comp_end = fall_end;
+        String current_semester = Util.formatSemester(Util.getCurrentSemester());
+
+        if (current_semester.startsWith("Wi")) {
+            comp_start = winter_start;
+            comp_end = winter_end;
+        }
+        if (current_semester.startsWith("Spr")) {
+            comp_start = spring_start;
+            comp_end = spring_end;
+        }
+        if (current_semester.startsWith("Sum")) {
+            comp_start = summer_start;
+            comp_end = summer_end;
+        }
+
+        String [] comp_dates = {comp_start+"/"+year, comp_end+"/"+year};
+
+        return comp_dates;
+    }
+
+    private List<Student> filterQueryByDate(List<Student> students, String type, String startDate, String endDate) {
+        List<Student> filteredStudents = new ArrayList<Student>();
+        String queryDate;
+
+        for (Student student : students) {
+            Calendar compare = Calendar.getInstance();
+            Calendar start = Calendar.getInstance();
+            Calendar end = Calendar.getInstance();
+
+            if (type.equals("413_current")){
+                queryDate = student.checkpointAdvising413;
+            }
+            else{
+                queryDate = student.checkpointSubmittedApplication;
+            }
+            SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy"); //pattern matching needs to be consistent with date format in checkpointDB.
+            try {
+                compare.setTime(formatter.parse(queryDate));
+                start.setTime(formatter.parse(startDate));
+                end.setTime(formatter.parse(endDate));
+            } catch (java.text.ParseException e) {
+                e.printStackTrace();
+                continue;
+            }
+
+            if (!(compare.before(start) || compare.after(end))){
+                filteredStudents.add(student);
+            }
+        }
+        return filteredStudents;
+    }
+
 }

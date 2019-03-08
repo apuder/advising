@@ -44,6 +44,7 @@ war {
         from('.') {
             include 'advising.properties'
             include 'course_requirements.json'
+            include 'semester_dates.properties'
         }
     }
 }

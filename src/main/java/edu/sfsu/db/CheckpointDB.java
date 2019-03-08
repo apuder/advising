@@ -149,10 +149,10 @@ public class CheckpointDB extends DB {
             connection = getConnection();
             connection.setCatalog(DB_NAME);
             String query = "select * from " + TABLE_NAME;
-            if (type.equals("413")) {
+            if (type.equals("413") || type.equals("413_current")) {
                 query += " where " + KEY_ADVISING_413 + " <> ''";
             }
-            if (type.equals("graduated")) {
+            if (type.equals("graduated") || type.equals("grad_current")) {
                 query += " where " + KEY_SUBMITTED_APPL + " <> ''";
             }
             PreparedStatement ps = connection.prepareStatement(query);
@@ -167,6 +167,7 @@ public class CheckpointDB extends DB {
                 student.checkpointAdvising413 = rs.getString(KEY_ADVISING_413);
                 student.checkpointSubmittedApplication = rs.getString(KEY_SUBMITTED_APPL);
                 list.add(student);
+                //System.out.println(student.firstName);
             }
             rs.close();
             ps.close();

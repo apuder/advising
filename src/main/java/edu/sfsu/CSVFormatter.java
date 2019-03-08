@@ -16,10 +16,10 @@ public class CSVFormatter {
         try (CSVWriter writer = new CSVWriter(out)) {
             for (Student student : students) {
                 String date = "-";
-                if (type.equals("413")) {
+                if (type.startsWith("413")) {
                     date = student.checkpointAdvising413;
                 }
-                if (type.equals("graduated")) {
+                if (type.startsWith("grad")) {
                     date = student.checkpointSubmittedApplication;
                 }
                 String[] row = {student.id, student.lastName, student.firstName, date};
