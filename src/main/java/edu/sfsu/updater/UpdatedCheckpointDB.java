@@ -75,7 +75,7 @@ public class UpdatedCheckpointDB extends CheckpointDB {
             System.out.println(id + ": " + student.firstName + " " + student.lastName);
             getCheckpoints(student);
             updateCheckpoints(student.id,student.firstName, student.lastName, student.email,
-                    student.checkpointOralPresentation, student.checkpointAdvising413,
+                    student.checkpointOralPresentation,
                     student.checkpointSubmittedApplication, student.comment);
         }
     }

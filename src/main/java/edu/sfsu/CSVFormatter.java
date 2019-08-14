@@ -16,9 +16,6 @@ public class CSVFormatter {
         try (CSVWriter writer = new CSVWriter(out)) {
             for (Student student : students) {
                 String date = "-";
-                if (type.equals("413")) {
-                    date = student.checkpointAdvising413;
-                }
                 if (type.equals("graduated")) {
                     date = student.checkpointSubmittedApplication;
                 }

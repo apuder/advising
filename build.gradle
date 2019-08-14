@@ -1,25 +1,20 @@
-apply plugin: 'war'
-apply plugin: 'jetty'
 
+apply plugin: 'war'
 apply plugin: 'java'
 apply plugin: 'application'
+apply plugin: 'org.gretty'
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'org.gretty:gretty:+'
+    }
+}
 
 mainClassName = 'edu.sfsu.updater.Updater'
-
-/*
-allprojects {
-    sourceCompatibility = 1.7
-}
-*/
-
-/*
-[jettyRun, jettyRunWar]*.with {
-    reload='automatic'
-    //jettyEnvXml = file('etc/jetty-env.xml')
-    jettyConfig= file('etc/jetty-config.xml')
-    additionalRuntimeJars = sourceSets.main.runtimeClasspath
-}
-*/
 
 repositories {
     flatDir { dirs 'libs' }
@@ -56,7 +51,3 @@ war.doFirst {
         throw new BuildCancelledException('File course_requirements.json not found!')
     }
 }
-
-httpPort = 8080
-stopPort = 9451
-stopKey = 'foo'

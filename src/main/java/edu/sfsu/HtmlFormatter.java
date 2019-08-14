@@ -119,8 +119,6 @@ public class HtmlFormatter {
 
         generateCheckpoint(fragment, student.id, student.checkpointOralPresentation,
                 "Senior Oral Presentation", "oral_presentation", false);
-        generateCheckpoint(fragment, student.id, student.checkpointAdvising413, "413 Advising",
-                "advising_413", true);
         generateCheckpoint(fragment, student.id, student.checkpointSubmittedApplication,
                 "Submitted Graduate Application", "submitted_appl", true);
 

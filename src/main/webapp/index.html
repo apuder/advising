@@ -117,31 +117,21 @@
             var studentLastName = document.getElementById('student_last_name').value;
             var studentEmail = document.getElementById('student_email').value;
             var checkpointOralPresentationNode = document.getElementById('date_oral_presentation');
-            var checkpointAdvising413Node = document.getElementById('date_advising_413');
             var checkpointSubmittedApplNode = document.getElementById('date_submitted_appl');
             var commentsNode = document.getElementById('comments');
 
             var checkpointOralPresentation = checkpointOralPresentationNode.value;
-            var checkpointAdvising413 = checkpointAdvising413Node.value;
             var checkpointSubmittedAppl = checkpointSubmittedApplNode.value;
             var comments = commentsNode.value;
 
             // Write back the attribute so that later innerHtml will read the updated values
             // for the printing page
             checkpointOralPresentationNode.setAttribute('value', checkpointOralPresentation);
-            checkpointAdvising413Node.setAttribute('value', checkpointAdvising413);
             checkpointSubmittedApplNode.setAttribute('value', checkpointSubmittedAppl);
             commentsNode.setAttribute('value', comments);
 
             var e = document.querySelector('#label_oral_presentation').MaterialSwitch;
             if (checkpointOralPresentation !== "") {
-                e.on();
-            } else {
-                e.off();
-            }
-
-            e = document.querySelector('#label_advising_413').MaterialSwitch;
-            if (checkpointAdvising413 !== "") {
                 e.on();
             } else {
                 e.off();
@@ -160,7 +150,6 @@
                 studentLastName: studentLastName,
                 studentEmail: studentEmail,
                 checkpointOralPresentation: checkpointOralPresentation,
-                checkpointAdvising413: checkpointAdvising413,
                 checkpointSubmittedAppl: checkpointSubmittedAppl,
                 comments: comments}, function(data, status) {
                 hide_spinner();
@@ -217,7 +206,6 @@
         </div>
         <div id="navigation" class="mdl-layout__tab-bar mdl-js-ripple-effect mdl-color--primary-dark display-none">
             <a href="#senior_advising" class="mdl-layout__tab is-active">Senior Advising</a>
-            <a href="#advising413" class="mdl-layout__tab">413 Advising List</a>
             <a href="#graduation_list" class="mdl-layout__tab">Graduation List</a>
         </div>
     </header>
@@ -258,18 +246,6 @@
                 <div id="section_student_info" style="display: none">
                     <img style="float: right" onclick="show_print_page()" src="ic_print_black_24dp_1x.png"/>
                     <div id="student_info"></div>
-                </div>
-            </section>
-        </div>
-        <div class="mdl-layout__tab-panel" id="advising413">
-            <section class="section--center mdl-grid mdl-grid--no-spacing">
-                <div class="mdl-card__supporting-text">
-                    <h4>413 Advising List</h4>
-                    <p>Compile a list of all students who have received 413 advising. A future version will
-                      allow to specify a date range.</p>
-                    <button class="mdl-button mdl-js-button mdl-button--fab" onclick="return generateList(this, '413')">
-                        <i class="material-icons">forward</i>
-                    </button>
                 </div>
             </section>
         </div>

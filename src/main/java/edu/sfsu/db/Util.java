@@ -60,11 +60,11 @@ public class Util {
         // Semester
         //TODO Hack
         char term;
-        if (month == 0) {
+        if (month == 0 && day < 25) {
             term = '1'; // Winter
         } else if (month < 5) {
             term = '3'; // Spring
-        } else if (month < 7) {
+        } else if (month < 8 && day < 20) {
             term = '5'; // Summer
         } else {
             term = '7'; // Fall
