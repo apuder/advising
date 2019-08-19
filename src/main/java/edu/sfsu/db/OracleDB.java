@@ -67,7 +67,17 @@ public class OracleDB extends DB implements CampusDB {
     private static void getStudentCoursesTakenSFSU(Connection connection, Student student)
             throws SQLException {
         // Courses taken at SFSU
-        String query = "select STRM, CRSE_GRADE_OFF, SUBJECT, CATALOG_NBR, EMPLID from CMSCOMMON.SFO_CR_MAIN_MV where emplid = ? order by STRM";
+        String query = "select a.STRM, a.CRSE_GRADE_OFF, a.SUBJECT, a.CATALOG_NBR, a.CLASS_SECTION, b.EMPLID, b.ENROLLED_STATUS " +
+                "from CMSCOMMON.SFO_CR_MAIN_MV a, CMSCOMMON.SFO_CR_ENROLL_MV b " +
+                "where a.strm = b.strm " +
+                "and a.emplid = b.emplid " +
+                "and a.class_nbr = b.class_nbr " +
+                "and a.session_code = b.session_code " +
+                "and a.subject = b.subject " +
+                "and a.catalog_nbr = b.catalog_nbr " +
+                "and a.class_section = b.class_section " +
+                "and b.enrolled_status in ('ENROLLED') " +
+                "and b.emplid = ? ORDER BY a.STRM";
         PreparedStatement ps = connection.prepareStatement(query);
         ps.setString(1, student.id);
         ResultSet rs = ps.executeQuery();
