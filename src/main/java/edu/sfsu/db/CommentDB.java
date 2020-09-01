@@ -1,6 +1,8 @@
 package edu.sfsu.db;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CommentDB extends DB {
 
@@ -10,6 +12,10 @@ public class CommentDB extends DB {
     final static protected String KEY_STUDENT_ID = "STUDENT_ID";
     final static protected String KEY_COURSE = "COURSE";
     final static protected String KEY_COMMENT = "COMMENT";
+
+    final static protected String KEY_TRANSCRIBED = "TRANSCRIBED";
+    final static protected String KEY_UPDATED_BY = "UPDATED_BY";
+    final static protected String KEY_LAST_UPDATED = "LAST_UPDATED";
 
 
     public CommentDB(String driver, String url, String user, String passwd) {
@@ -25,7 +31,7 @@ public class CommentDB extends DB {
             ResultSet resultSet = connection.getMetaData().getCatalogs();
             while (resultSet.next()) {
                 String databaseName = resultSet.getString(1);
-                if (databaseName.equals(DB_NAME)) {
+                if (databaseName.equalsIgnoreCase(DB_NAME)) {
                     hasDB = true;
                     break;
                 }
@@ -46,7 +52,9 @@ public class CommentDB extends DB {
             connection.setCatalog(DB_NAME);
             String sql = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + "(" + KEY_STUDENT_ID
                     + " VARCHAR(11) NOT NULL, " + KEY_COURSE + " VARCHAR(18) NOT NULL, " + KEY_COMMENT
-                    + " TEXT NOT NULL)";
+                    + " TEXT NOT NULL, " + KEY_TRANSCRIBED + " BOOLEAN DEFAULT FALSE, " + KEY_UPDATED_BY
+                    + " VARCHAR(11) NOT NULL DEFAULT \"99999999999\", " + KEY_LAST_UPDATED
+                    + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)";
             Statement stmt = connection.createStatement();
             stmt.execute(sql);
             stmt.close();
@@ -107,7 +115,7 @@ public class CommentDB extends DB {
             ps.close();
 
             if (hasComment) {
-                query = "update " + TABLE_NAME + " set " + KEY_COMMENT + " = ? where " + KEY_STUDENT_ID +
+                query = "update " + TABLE_NAME + " set " + KEY_COMMENT + " = ?, " + KEY_TRANSCRIBED + " = FALSE where " + KEY_STUDENT_ID +
                         " = ? and " + KEY_COURSE + " = ?";
                 ps = connection.prepareStatement(query);
                 ps.setString(1, comment);
@@ -125,6 +133,72 @@ public class CommentDB extends DB {
                 ps.executeUpdate();
                 ps.close();
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                }
+            }
+        }
+    }
+
+    public List<Student> getAdvisorRequestList() {
+        List<Student> students = new ArrayList<>();
+        Connection connection = null;
+        try {
+            connection = getConnection();
+            connection.setCatalog(DB_NAME);
+            String query = "SELECT * FROM " + TABLE_NAME + " WHERE " + KEY_TRANSCRIBED + " = FALSE ORDER BY " + KEY_STUDENT_ID;
+            PreparedStatement ps = connection.prepareStatement(query);
+            ResultSet rs = ps.executeQuery();
+
+            Student currentStudent = null;
+
+            while (rs.next()) {
+                String student_id = rs.getString(KEY_STUDENT_ID);
+                if (currentStudent == null || !currentStudent.id.equals(student_id)) {
+                    if (currentStudent != null) {
+                        students.add(currentStudent);
+                    }
+                    currentStudent = new Student(student_id);
+                }
+                String course = rs.getString(KEY_COURSE);
+                String comment = rs.getString(KEY_COMMENT);
+                currentStudent.comments.put(course, comment);
+            }
+            if (currentStudent != null) {
+                students.add(currentStudent);
+            }
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                }
+            }
+        }
+        return students;
+    }
+
+    public void updateTranscribed(String id, boolean checked) {
+        Connection connection = null;
+        try {
+            connection = getConnection();
+            connection.setCatalog(DB_NAME);
+            String query = "UPDATE " + TABLE_NAME + " SET " + KEY_TRANSCRIBED + " = ? WHERE " + KEY_STUDENT_ID + " = ?";
+            PreparedStatement ps = connection.prepareStatement(query);
+            ps.setBoolean(1, checked);
+            ps.setString(2, id);
+
+            ps.executeUpdate();
+            ps.close();
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {

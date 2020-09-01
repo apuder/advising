@@ -30,7 +30,8 @@ public class AdvisingServlet extends HttpServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         ServletContext context = config.getServletContext();
-        HtmlFormatter.init(context);
+        HtmlFormatterStudentInfo.init(context);
+        HtmlFormatterAdvisorRequest.init(context);
 
         Properties props = new Properties();
 
@@ -108,6 +109,17 @@ public class AdvisingServlet extends HttpServlet {
             response.addHeader("Pragma", "no-cache");
             processGenerateList(out, type);
         }
+
+        if (path.equals("/generate-advisor-request-list")) {
+            processAdvisorRequestGetList(out);
+        }
+
+        if (path.equals("/update-transcribed")) {
+            String id = request.getParameter("id");
+            String checked = request.getParameter("checked");
+            processUpdateTranscribed(id, checked.equalsIgnoreCase("true"));
+        }
+
         out.close();
     }
 
@@ -126,7 +138,7 @@ public class AdvisingServlet extends HttpServlet {
         if (student != null) {
             commentDB.getComments(student);
             checkpointDB.getCheckpoints(student);
-            html = HtmlFormatter.generateHtml(student);
+            html = HtmlFormatterStudentInfo.generateHtml(student);
         } else {
             html = "<b>Student not found</b>";
         }
@@ -147,5 +159,17 @@ public class AdvisingServlet extends HttpServlet {
     private void processGenerateList(PrintWriter out, String type) {
         List<Student> students = checkpointDB.generateList(type);
         CSVFormatter.generateList(out, students, type);
+    }
+
+    private void processAdvisorRequestGetList(PrintWriter out) throws IOException {
+        List<Student> students = commentDB.getAdvisorRequestList();
+        checkpointDB.getStudentInfo(students);
+        campusDB.getStudentInfo(students);
+        String html = HtmlFormatterAdvisorRequest.generateHtml(students);
+        out.println(html);
+    }
+
+    private void processUpdateTranscribed(String id, boolean checked) {
+        commentDB.updateTranscribed(id, checked);
     }
 }

@@ -32,4 +32,14 @@
         <servlet-name>AdvisingServlet</servlet-name>
         <url-pattern>/generate-list</url-pattern>
     </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>AdvisingServlet</servlet-name>
+        <url-pattern>/generate-advisor-request-list</url-pattern>
+    </servlet-mapping>
+    
+    <servlet-mapping>
+        <servlet-name>AdvisingServlet</servlet-name>
+        <url-pattern>/update-transcribed</url-pattern>
+    </servlet-mapping>
 </web-app>

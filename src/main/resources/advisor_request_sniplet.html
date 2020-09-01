@@ -1,0 +1,19 @@
+<!--%%BLOCK:student_advisor_request%%-->
+<p>
+  <h4 style='margin-bottom: 0'>%%student_first_name%% %%student_last_name%% &lt;<a href='mailto:%%student_email%%'>%%student_email%%</a>&gt;</h4>
+  <label id='label_%%student_id%%' class='mdl-switch mdl-js-switch mdl-js-ripple-effect' for='check_%%student_id%%'>
+    <input type='checkbox' id='check_%%student_id%%' class='mdl-switch__input' style='float: right;' onclick="return equivalency_entered('%%student_id%%');"/>
+    <span class='mdl-switch__label'></span>
+  </label>
+  Student ID: <input id="id_%%student_id%%" value="%%student_id%%" style="border: 0;" size="11" readonly>
+  <button class="clippy" data-clipboard-target="#id_%%student_id%%">
+    <img src="clippy.svg" alt="Copy to clipboard">
+  </button>
+  <br/>&nbsp;<br/>
+  <textarea id="equiv_%%student_id%%" rows="5" style="width: 90%;" readonly>%%course_equivalencies%%</textarea>
+  <button class="clippy" data-clipboard-target="#equiv_%%student_id%%">
+    <img src="clippy.svg" alt="Copy to clipboard">
+  </button>
+  <p>&nbsp;</p>
+</p>
+<!--%%END%%-->

@@ -16,6 +16,10 @@ public class CheckpointDB extends DB {
     final static protected String KEY_SUBMITTED_APPL     = "SUBMITTED_APPL";
     final static protected String KEY_COMMENTS           = "COMMENTS";
 
+    final static protected String KEY_TRANSCRIBED = "TRANSCRIBED";
+    final static protected String KEY_UPDATED_BY = "UPDATED_BY";
+    final static protected String KEY_LAST_UPDATED = "LAST_UPDATED";
+
 
     public CheckpointDB(String driver, String url, String user, String passwd) {
         super(driver, url, user, passwd);
@@ -30,7 +34,7 @@ public class CheckpointDB extends DB {
             ResultSet resultSet = connection.getMetaData().getCatalogs();
             while (resultSet.next()) {
                 String databaseName = resultSet.getString(1);
-                if (databaseName.equals(DB_NAME)) {
+                if (databaseName.equalsIgnoreCase(DB_NAME)) {
                     hasDB = true;
                     break;
                 }
@@ -54,7 +58,9 @@ public class CheckpointDB extends DB {
                     + KEY_STUDENT_LAST_NAME + " TEXT, "
                     + KEY_STUDENT_EMAIL + " TEXT, " + KEY_ORAL_PRESENTATION + " TEXT, "
                     + KEY_SUBMITTED_APPL + " TEXT, "
-                    + KEY_COMMENTS + " TEXT)";
+                    + KEY_COMMENTS + " TEXT, " + KEY_TRANSCRIBED + " BOOLEAN DEFAULT FALSE, " + KEY_UPDATED_BY
+                    + " VARCHAR(11) NOT NULL DEFAULT \"99999999999\", " + KEY_LAST_UPDATED
+                    + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)";;
             Statement stmt = connection.createStatement();
             stmt.execute(sql);
             stmt.close();
@@ -109,7 +115,7 @@ public class CheckpointDB extends DB {
             String query = "insert into " + TABLE_NAME + "(" + KEY_STUDENT_ID + ", "
                     + KEY_STUDENT_FIRST_NAME + ", " + KEY_STUDENT_LAST_NAME + ", " + KEY_STUDENT_EMAIL + ", " + KEY_ORAL_PRESENTATION
                     + ", " + KEY_SUBMITTED_APPL + ", " + KEY_COMMENTS
-                    + ") values (?, ?, ?, ?, ?, ?, ?) on duplicate key update ";
+                    + ", " + KEY_TRANSCRIBED + ") values (?, ?, ?, ?, ?, ?, ?, FALSE) on duplicate key update ";
             query += KEY_STUDENT_FIRST_NAME + " = values(" + KEY_STUDENT_FIRST_NAME + "), ";
             query += KEY_STUDENT_LAST_NAME + " = values(" + KEY_STUDENT_LAST_NAME + "), ";
             query += KEY_STUDENT_EMAIL + " = values(" + KEY_STUDENT_EMAIL + "), ";
@@ -173,5 +179,34 @@ public class CheckpointDB extends DB {
             }
         }
         return list;
+    }
+
+    public void getStudentInfo(List<Student> students) {
+        Connection connection = null;
+        try {
+            connection = getConnection();
+            for (Student student : students) {
+                String query = "select * from " + TABLE_NAME + " where " + KEY_STUDENT_ID + " = ?";
+                PreparedStatement ps = connection.prepareStatement(query);
+                ps.setString(1, student.id);
+                ResultSet rs = ps.executeQuery();
+
+                if (rs.next()) {
+                    student.firstName = rs.getString(KEY_STUDENT_FIRST_NAME);
+                    student.lastName = rs.getString(KEY_STUDENT_LAST_NAME);
+                    student.email = rs.getString(KEY_STUDENT_EMAIL);
+                }
+                rs.close();
+                ps.close();
+            }
+        } catch (SQLException e) {
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                }
+            }
+        }
     }
 }

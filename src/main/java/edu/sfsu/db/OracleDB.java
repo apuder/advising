@@ -187,6 +187,10 @@ public class OracleDB extends DB implements CampusDB {
         try {
             connection = getConnection();
             for (Student student : students) {
+                boolean missingInfo = student.firstName.isEmpty() || student.lastName.isEmpty() || student.email.isEmpty();
+                if (!missingInfo) {
+                    continue;
+                }
                 String query = "select * from CMSCOMMON.SFO_CR_MAIN_MV where emplid = ?";
                 PreparedStatement ps = connection.prepareStatement(query);
                 ps.setString(1, student.id);

@@ -7,9 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
     <title>San Francisco State University - Computer Science</title>
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="https://code.getmdl.io/1.1.3/material.deep_purple-pink.min.css">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
     <link rel="stylesheet" href="styles.css">
     <style>
         .general {
@@ -32,6 +31,7 @@
         }
     </style>
     <script src="date.format.js" type="application/javascript"></script>
+    <script src="clipboard.min.js" type="application/javascript"></script>
     <script>
         var spinner_count = 0;
         var token = "";
@@ -192,9 +192,47 @@
             */
             return false;
         }
+
+        function equivalency_entered(id) {
+            let checked = document.getElementById('check_' + id).checked;
+            $.post("update-transcribed", {token: token, id: id,
+                checked: checked}, function(data, status) {
+                show_toast();
+            });
+            return true;
+        }
+
+        function generateAdvisorRequestList() {
+            let list = document.getElementById('advisor_request_list');
+            list.innerText = 'Loading...';
+            $.post("generate-advisor-request-list", {token: token}, function(data, status) {
+                list.innerHTML = data;
+                new ClipboardJS('.clippy');
+            });
+        }
+
+        function mutationCallback(mutationsList, observer) {
+            // A kludge to see if the user clicked on "Advisor Request" tab
+            let first = true;
+            mutationsList.forEach(mutation => {
+                if (first && mutation.attributeName === 'class') {
+                    if (mutation.target.classList.contains('is-active')) {
+                        generateAdvisorRequestList();
+                        first = false;
+                    }
+                }
+            });
+        }
+
+        function init() {
+            const mutationObserver = new MutationObserver(mutationCallback);
+            mutationObserver.observe(
+                document.getElementById('advisor_request'), { attributes: true }
+            );
+        }
     </script>
 </head>
-<body class="mdl-demo mdl-color-text--grey-700 mdl-base">
+<body class="mdl-demo mdl-color-text--grey-700 mdl-base" onload="init();">
 <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
     <header class="mdl-layout__header mdl-layout__header--scroll mdl-color--primary">
         <div class="mdl-layout--large-screen-only mdl-layout__header-row">
@@ -207,6 +245,7 @@
         <div id="navigation" class="mdl-layout__tab-bar mdl-js-ripple-effect mdl-color--primary-dark display-none">
             <a href="#senior_advising" class="mdl-layout__tab is-active">Senior Advising</a>
             <a href="#graduation_list" class="mdl-layout__tab">Graduation List</a>
+            <a href="#advisor_request" class="mdl-layout__tab">Advisor Request</a>
         </div>
     </header>
     <main id="section_login" class="mdl-layout__content">
@@ -243,7 +282,7 @@
                         </div>
                     </form>
                 </div>
-                <div id="section_student_info" style="display: none">
+                <div id="section_student_info" style="display: none; width: 100%">
                     <img style="float: right" onclick="show_print_page()" src="ic_print_black_24dp_1x.png"/>
                     <div id="student_info"></div>
                 </div>
@@ -254,10 +293,19 @@
                 <div class="mdl-card__supporting-text">
                     <h4>Graduation List</h4>
                     <p>Compile a list of all students who have graduated. A future version will
-                      allow to specify a date range.</p>
+                        allow to specify a date range.</p>
                     <button class="mdl-button mdl-js-button mdl-button--fab" onclick="return generateList(this, 'graduated')">
                         <i class="material-icons">forward</i>
                     </button>
+                </div>
+            </section>
+        </div>
+        <div class="mdl-layout__tab-panel" id="advisor_request">
+            <section class="section--center mdl-grid mdl-grid--no-spacing">
+                <div class="mdl-card__supporting-text">
+                    <h4>Advisor Request</h4>
+                    <div id="advisor_request_list" style="width: 100%">
+                    </div>
                 </div>
             </section>
         </div>
@@ -267,7 +315,7 @@
         <button class="mdl-snackbar__action" type="button"></button>
     </div>
 </div>
-<script src="jquery-2.1.4.min.js"></script>
-<script src="https://code.getmdl.io/1.1.3/material.min.js"></script>
+<script src="jquery-3.5.1.min.js"></script>
+<script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
 </body>
 </html>
