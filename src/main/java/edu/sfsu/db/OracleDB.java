@@ -104,7 +104,6 @@ public class OracleDB extends DB implements CampusDB {
         // Courses transferred
         String query = "select " +
                 "DISTINCT D.EMPLID " +
-                "--, D.CRSE_ID AS \"CRSE_DTL_CRSE_ID\", D.ARTICULATION_TERM AS \"CRSE_DTL_ARTICULATION_TERM\" " +
                 ", C.CRSE_ID, C.SUBJECT AS SFSU_SUBJECT, C.CATALOG_NBR AS SFSU_NBR, C.DESCR " +
                 ", D.EXT_COURSE_NBR, D.CRSE_GRADE_OFF " +
                 ", O.EXT_ORG_ID, O.DESCR AS SCHOOLNAME " +
