@@ -102,20 +102,41 @@ public class OracleDB extends DB implements CampusDB {
     private static void getStudentCoursesTransferred(Connection connection, Student student)
             throws SQLException {
         // Courses transferred
-        String query = "select DISTINCT D.EMPLID, C.CRSE_ID, C.SUBJECT SFSU_SUBJECT, C.CATALOG_NBR AS SFSU_NBR, C.DESCR, D.EXT_COURSE_NBR, D.CRSE_GRADE_OFF "
-                + ", O.EXT_ORG_ID, O.DESCR AS SCHOOLNAME, A.LS_SCHOOL_TYPE "
-                + ", E.SCHOOL_SUBJECT, E.SCHOOL_CRSE_NBR, E.EXT_TERM, E.TERM_YEAR "
-                + "from CMSCOMMON.SFO_TRNS_CRSE_DTL D, CMSCOMMON.SFO_CLASS_TBL C "
-                + ", CMSCOMMON.SFO_EXT_ORG_TBL O, CMSCOMMON.SFO_EXT_ORG_TBL_ADM A "
-                + ", CMSCOMMON.SFO_EXT_COURSE_MV E where D.EMPLID = ? "
-                + "AND D.CRSE_ID = C.CRSE_ID AND D.ARTICULATION_TERM = C.STRM "
-                + "AND D.TRNSFR_SRC_ID = O.EXT_ORG_ID "
-                + "AND O.EFFDT = (SELECT MAX(EFFDT) FROM CMSCOMMON.SFO_EXT_ORG_TBL WHERE EXT_ORG_ID = O.EXT_ORG_ID) "
-                + "AND D.TRNSFR_SRC_ID = A.EXT_ORG_ID "
-                + "AND A.EFFDT = (SELECT MAX(EFFDT) FROM CMSCOMMON.SFO_EXT_ORG_TBL_ADM WHERE EXT_ORG_ID = A.EXT_ORG_ID)"
-                + "AND D.EMPLID = E.EMPLID(+) AND D.TRNSFR_SRC_ID = E.EXT_ORG_ID(+) "
-                + "AND D.EXT_COURSE_NBR = E.EXT_COURSE_NBR(+)";
-
+        String query = "select " +
+                "DISTINCT D.EMPLID " +
+                "--, D.CRSE_ID AS \"CRSE_DTL_CRSE_ID\", D.ARTICULATION_TERM AS \"CRSE_DTL_ARTICULATION_TERM\" " +
+                ", C.CRSE_ID, C.SUBJECT AS SFSU_SUBJECT, C.CATALOG_NBR AS SFSU_NBR, C.DESCR " +
+                ", D.EXT_COURSE_NBR, D.CRSE_GRADE_OFF " +
+                ", O.EXT_ORG_ID, O.DESCR AS SCHOOLNAME " +
+                ", A.LS_SCHOOL_TYPE " +
+                ", E.SCHOOL_SUBJECT, E.SCHOOL_CRSE_NBR, E.EXT_TERM, E.TERM_YEAR " +
+                "from CMSCOMMON.SFO_TRNS_CRSE_DTL D " +
+                ", CMSCOMMON.SFO_CLASS_TBL C " +
+                ", CMSCOMMON.SFO_EXT_ORG_TBL O " +
+                ", CMSCOMMON.SFO_EXT_ORG_TBL_ADM A " +
+                ", CMSCOMMON.SFO_EXT_COURSE_MV E " +
+                "where D.EMPLID = ? " +
+                "AND D.CRSE_ID = C.CRSE_ID(+) " +
+                "AND (D.ARTICULATION_TERM = C.STRM " +
+                "        OR " +
+                "         D.ARTICULATION_TERM > (SELECT MAX(STRM) FROM CMSCOMMON.SFO_CLASS_TBL WHERE CRSE_ID = C.CRSE_ID) " +
+                "         OR " +
+                "         C.STRM IS NULL) " +
+                "AND (C.DESCR IN (SELECT DISTINCT DESCR FROM CMSCOMMON.SFO_CLASS_TBL " +
+                "                                        WHERE CRSE_ID = C.CRSE_ID " +
+                "                                        AND (STRM = D.ARTICULATION_TERM OR " +
+                "                                                STRM = (SELECT MAX(STRM) FROM CMSCOMMON.SFO_CLASS_TBL WHERE CRSE_ID = C.CRSE_ID)) " +
+                "                                        ) " +
+                "        OR " +
+                "        C.DESCR IS NULL) " +
+                "AND D.TRNSFR_SRC_ID = O.EXT_ORG_ID " +
+                "AND O.EFFDT = (SELECT MAX(EFFDT) FROM CMSCOMMON.SFO_EXT_ORG_TBL WHERE EXT_ORG_ID = O.EXT_ORG_ID) " +
+                "AND D.TRNSFR_SRC_ID = A.EXT_ORG_ID " +
+                "AND A.EFFDT = (SELECT MAX(EFFDT) FROM CMSCOMMON.SFO_EXT_ORG_TBL_ADM WHERE EXT_ORG_ID = A.EXT_ORG_ID) " +
+                "AND D.EMPLID = E.EMPLID(+) " +
+                "AND D.TRNSFR_SRC_ID = E.EXT_ORG_ID(+) " +
+                "AND D.EXT_COURSE_NBR = E.EXT_COURSE_NBR(+) " +
+                "ORDER BY 2";
         PreparedStatement ps = connection.prepareStatement(query);
         ps.setString(1, student.id);
         ResultSet rs = ps.executeQuery();
