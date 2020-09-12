@@ -156,10 +156,8 @@ public class OracleDB extends DB implements CampusDB {
             } else {
                 course.transferCourse = transferSubject + " " + transferCourse;
             }
-            if (isValidTransfer(course)) {
-                synchronized (student) {
-                    student.courses.add(course);
-                }
+            synchronized (student) {
+                student.courses.add(course);
             }
         }
         rs.close();
@@ -233,36 +231,6 @@ public class OracleDB extends DB implements CampusDB {
                 }
             }
         }
-    }
-
-    /**
-     * <pre>
-     *     cs = SFSU class
-     *     ct = Class, that is shown as equivalent to 'cs' in the transfer transcript
-     * 
-     *     IF cs is an upper division class AND
-     *        ct is a lower division class AND
-     *        institution where ct was taken is a 2-year college
-     *        THEN course cannot be used as a graduation requirement
-     * </pre>
-     */
-    private static boolean isValidTransfer(Course course) {
-        if (!course.transferSchoolType.equals("CC")) {
-            // If originating school is not a Community College, it is assumed
-            // not to be 2-year school.
-            return true;
-        }
-        final String DIGIT_FILTER = "[^0-9]+";
-        int cs = 0;
-        int ct = 0;
-        try {
-            cs = Integer.parseInt(course.courseName.replaceAll(DIGIT_FILTER, ""));
-            ct = Integer.parseInt(course.transferCourse.replaceAll(DIGIT_FILTER, ""));
-        } catch (NumberFormatException ex) {
-            // If the numbers cannot be parsed, assume it can be transferred
-            return true;
-        }
-        return !(cs >= 300 && ct < 300);
     }
 
     private static String formatSemester(String term, String year) {
