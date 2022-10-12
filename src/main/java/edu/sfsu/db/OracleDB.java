@@ -67,7 +67,7 @@ public class OracleDB extends DB implements CampusDB {
     private static void getStudentCoursesTakenSFSU(Connection connection, Student student)
             throws SQLException {
         // Courses taken at SFSU
-        String query = "select a.STRM, a.CRSE_GRADE_OFF, a.SUBJECT, a.CATALOG_NBR, a.CLASS_SECTION, b.EMPLID, b.ENROLLED_STATUS " +
+        String query = "select distinct a.STRM, a.CRSE_GRADE_OFF, a.SUBJECT, a.CATALOG_NBR, a.CLASS_SECTION, b.EMPLID, b.ENROLLED_STATUS " +
                 "from CMSCOMMON.SFO_CR_MAIN_MV a, CMSCOMMON.SFO_CR_ENROLL_MV b " +
                 "where a.strm = b.strm " +
                 "and a.emplid = b.emplid " +
